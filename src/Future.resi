@@ -92,15 +92,27 @@ let tap: (t<'a>, 'a => unit) => t<'a>
 /**
  * Utils for Future.t<result<'a, 'b>>
  */
-let mapResult: (t<result<'a, 'b>>, 'a => result<'c, 'b>) => t<result<'c, 'b>>
+let mapResult: (
+  t<result<'a, 'b>>,
+  ~propagateCancel: bool=?,
+  'a => result<'c, 'b>,
+) => t<result<'c, 'b>>
 
-let mapOk: (t<result<'a, 'b>>, 'a => 'c) => t<result<'c, 'b>>
+let mapOk: (t<result<'a, 'b>>, ~propagateCancel: bool=?, 'a => 'c) => t<result<'c, 'b>>
 
-let mapError: (t<result<'a, 'b>>, 'b => 'c) => t<result<'a, 'c>>
+let mapError: (t<result<'a, 'b>>, ~propagateCancel: bool=?, 'b => 'c) => t<result<'a, 'c>>
 
-let flatMapOk: (t<result<'a, 'b>>, 'a => t<result<'c, 'b>>) => t<result<'c, 'b>>
+let flatMapOk: (
+  t<result<'a, 'b>>,
+  ~propagateCancel: bool=?,
+  'a => t<result<'c, 'b>>,
+) => t<result<'c, 'b>>
 
-let flatMapError: (t<result<'a, 'b>>, 'b => t<result<'a, 'c>>) => t<result<'a, 'c>>
+let flatMapError: (
+  t<result<'a, 'b>>,
+  ~propagateCancel: bool=?,
+  'b => t<result<'a, 'c>>,
+) => t<result<'a, 'c>>
 
 let tapOk: (t<result<'a, 'b>>, 'a => unit) => t<result<'a, 'b>>
 

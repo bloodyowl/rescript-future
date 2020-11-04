@@ -194,8 +194,8 @@ let tapError = (future, f) => {
   future
 }
 
-let mapResult = (future, f) => {
-  future->map(result =>
+let mapResult = (future, ~propagateCancel=?, f) => {
+  future->map(~propagateCancel?, result =>
     switch result {
     | Ok(ok) => f(ok)
     | Error(error) => Error(error)
@@ -203,8 +203,8 @@ let mapResult = (future, f) => {
   )
 }
 
-let mapOk = (future, f) => {
-  future->map(result =>
+let mapOk = (future, ~propagateCancel=?, f) => {
+  future->map(~propagateCancel?, result =>
     switch result {
     | Ok(ok) => Ok(f(ok))
     | Error(error) => Error(error)
@@ -212,8 +212,8 @@ let mapOk = (future, f) => {
   )
 }
 
-let mapError = (future, f) => {
-  future->map(result =>
+let mapError = (future, ~propagateCancel=?, f) => {
+  future->map(~propagateCancel?, result =>
     switch result {
     | Ok(ok) => Ok(ok)
     | Error(error) => Error(f(error))
@@ -221,8 +221,8 @@ let mapError = (future, f) => {
   )
 }
 
-let flatMapOk = (future, f) => {
-  future->flatMap(result =>
+let flatMapOk = (future, ~propagateCancel=?, f) => {
+  future->flatMap(~propagateCancel?, result =>
     switch result {
     | Ok(ok) => f(ok)
     | Error(error) => value(Error(error))
@@ -230,8 +230,8 @@ let flatMapOk = (future, f) => {
   )
 }
 
-let flatMapError = (future, f) => {
-  future->flatMap(result =>
+let flatMapError = (future, ~propagateCancel=?, f) => {
+  future->flatMap(~propagateCancel?, result =>
     switch result {
     | Ok(ok) => value(Ok(ok))
     | Error(error) => f(error)
