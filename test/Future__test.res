@@ -314,6 +314,37 @@ describe("Future cancellation", ({testAsync}) => {
     }, 20)
   })
 
+  testAsync("cancels to the top if specified", ({expect, callback}) => {
+    let counter = ref(0)
+    let secondCounter = ref(0)
+    let future = Future.make(resolve => {
+      let timeoutId = Js.Global.setTimeout(() => {
+        incr(counter)
+        resolve(1)
+      }, 10)
+      Some(() => Js.Global.clearTimeout(timeoutId))
+    })
+    let future2 = Future.make(resolve => {
+      let timeoutId = Js.Global.setTimeout(() => {
+        incr(secondCounter)
+        resolve(1)
+      }, 10)
+      Some(() => Js.Global.clearTimeout(timeoutId))
+    })
+    let future3 = future->Future.flatMap(~propagateCancel=true, _ => future2)
+    let future4 = future3->Future.map(~propagateCancel=true, item => item + 1)
+    future4->Future.cancel
+    expect.bool(future->Future.isCancelled).toBeTrue()
+    expect.bool(future2->Future.isCancelled).toBeFalse()
+    expect.bool(future3->Future.isCancelled).toBeTrue()
+    expect.bool(future4->Future.isCancelled).toBeTrue()
+    let _ = Js.Global.setTimeout(() => {
+      expect.int(counter.contents).toBe(0)
+      expect.int(secondCounter.contents).toBe(1)
+      callback()
+    }, 20)
+  })
+
   testAsync("cancels promise and runs cancel effect up the dependents", ({expect, callback}) => {
     let counter = ref(0)
     let future = Future.make(resolve => {

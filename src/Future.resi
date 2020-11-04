@@ -59,7 +59,7 @@ let get: (t<'a>, 'a => unit) => unit
  * Cancels:
  * - the future you call it on
  * - the futures it depends on (if the future was created using `map` or `flatMap`)
- * 
+ *
  * Note that it doesn't cancel futures returned by the flatMap callback
  *
  * example:
@@ -77,12 +77,12 @@ let cancel: t<'a> => unit
 /**
  * Returns a future with the value of the source future mapped
  */
-let map: (t<'a>, 'a => 'b) => t<'b>
+let map: (t<'a>, ~propagateCancel: bool=?, 'a => 'b) => t<'b>
 
 /**
  * Returns a future with the value of the source future mapped where the mapper returns a future itself
  */
-let flatMap: (t<'a>, 'a => t<'b>) => t<'b>
+let flatMap: (t<'a>, ~propagateCancel: bool=?, 'a => t<'b>) => t<'b>
 
 /**
  * Debug

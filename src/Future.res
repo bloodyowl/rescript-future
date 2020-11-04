@@ -117,11 +117,20 @@ let cancel = future => {
   }
 }
 
-let map = (source, f) => {
-  let future = makePure(resolve => {
+let map = (source, ~propagateCancel=false, f) => {
+  let future = make(resolve => {
     source->get(value => {
       resolve(f(value))
     })
+    if propagateCancel {
+      Some(
+        () => {
+          source->cancel
+        },
+      )
+    } else {
+      None
+    }
   })
   source->onCancel(() => {
     let _ = future->cancel
@@ -129,7 +138,7 @@ let map = (source, f) => {
   future
 }
 
-let flatMap = (source, f) => {
+let flatMap = (source, ~propagateCancel=false, f) => {
   let pendingPayload = {
     resolveCallbacks: None,
     cancelCallbacks: None,
@@ -149,6 +158,13 @@ let flatMap = (source, f) => {
     })
     source'->onCancel(() => future->cancel)
   })
+  if propagateCancel {
+    pendingPayload.cancel = Some(
+      () => {
+        source->cancel
+      },
+    )
+  }
   source->onCancel(() => future->cancel)
   future
 }
