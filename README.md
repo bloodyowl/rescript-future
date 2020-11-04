@@ -37,7 +37,9 @@ Future.value(1)
 // Logs: 3
 ```
 
-## Utils
+## API
+
+See the details in [the interface file](./src/Future.resi)
 
 ### Create
 
@@ -56,7 +58,7 @@ Future.value(1)
 ### Transform
 
 - `map(future, mapper)`: Returns a new mapped future
-- `map(future, mapper)`: Returns a new mapped future with mapper returning a future itself
+- `flatMap(future, mapper)`: Returns a new mapped future with mapper returning a future itself
 
 ### Test
 
@@ -87,6 +89,12 @@ Future.value(1)
 - `all5((future, future, future, future, future))`
 - `all6((future, future, future, future, future, future))`
 - `all(array<future>)`
+
+### Interop
+
+- `fromPromise`
+- `toPromise`
+- `resultToPromise`
 
 ## Cancellation
 
