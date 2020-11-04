@@ -1,3 +1,9 @@
+# 1.0.2
+
+Features:
+
+- Add cancel propagation to result helpers (aeca60c)
+
 # 1.0.1
 
 Features:
