@@ -1,0 +1,35 @@
+{
+  "name": "rescript-future",
+  "version": "0.1.0",
+  "scripts": {
+    "clean": "bsb -clean-world",
+    "build": "bsb -make-world",
+    "watch": "bsb -make-world -w",
+    "test": "jest"
+  },
+  "keywords": [
+    "BuckleScript"
+  ],
+  "author": "bloodyowl <bloodyowl@icloud.com>",
+  "jest": {
+    "moduleDirectories": [
+      "node_modules"
+    ],
+    "roots": [
+      "test"
+    ],
+    "testMatch": [
+      "**/*__test.bs.js"
+    ],
+    "transformIgnorePatterns": [
+      "node_modules/(?!(bs-platform|reason-react|reason-react-compat|reason-react-update|bs-webapi|bs-css|bs-css-emotion)/)"
+    ]
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "bs-platform": "^8.3.2",
+    "jest": "^26.6.3",
+    "reason-test-framework": "^0.3.2"
+  },
+  "dependencies": {}
+}

@@ -1,0 +1,251 @@
+open Belt
+
+type pendingPayload<'a> = {
+  mutable resolveCallbacks: option<MutableQueue.t<'a => unit>>,
+  mutable cancelCallbacks: option<MutableQueue.t<unit => unit>>,
+  mutable cancel: option<unit => unit>,
+}
+
+type status<'a> = [#Pending(pendingPayload<'a>) | #Cancelled | #Resolved('a)]
+
+type t<'a> = {mutable status: status<'a>}
+
+let isPending = future => {
+  switch future.status {
+  | #Pending(_) => true
+  | #Cancelled | #Resolved(_) => false
+  }
+}
+
+let isCancelled = future => {
+  switch future.status {
+  | #Cancelled => true
+  | #Pending(_) | #Resolved(_) => false
+  }
+}
+
+let isResolved = future => {
+  switch future.status {
+  | #Resolved(_) => true
+  | #Pending(_) | #Cancelled => false
+  }
+}
+
+let value = value => {
+  status: #Resolved(value),
+}
+
+let rec run = (callbacks, value) => {
+  switch callbacks->MutableQueue.pop {
+  | Some(callback) =>
+    callback(value)
+    run(callbacks, value)
+  | None => ()
+  }
+}
+
+let make = init => {
+  let pendingPayload = {
+    resolveCallbacks: None,
+    cancelCallbacks: None,
+    cancel: None,
+  }
+  let future = {
+    status: #Pending(pendingPayload),
+  }
+  let resolver = value => {
+    future.status = #Resolved(value)
+    switch pendingPayload.resolveCallbacks {
+    | Some(resolveCallbacks) => run(resolveCallbacks, value)
+    | _ => ()
+    }
+  }
+  pendingPayload.cancel = init(resolver)
+  future
+}
+
+let makePure = init => {
+  make(resolve => {
+    init(resolve)
+    None
+  })
+}
+
+let get = (future, func) => {
+  switch future.status {
+  | #Cancelled => ()
+  | #Pending(pendingPayload) =>
+    switch pendingPayload.resolveCallbacks {
+    | Some(resolveCallbacks) => resolveCallbacks->MutableQueue.add(func)
+    | None =>
+      let resolveCallbacks = MutableQueue.make()
+      resolveCallbacks->MutableQueue.add(func)
+      pendingPayload.resolveCallbacks = Some(resolveCallbacks)
+    }
+  | #Resolved(value) => func(value)
+  }
+}
+
+let onCancel = (future, func) => {
+  switch future.status {
+  | #Cancelled => func()
+  | #Pending(pendingPayload) =>
+    switch pendingPayload.cancelCallbacks {
+    | Some(cancelCallbacks) => cancelCallbacks->MutableQueue.add(func)
+    | None =>
+      let cancelCallbacks = MutableQueue.make()
+      cancelCallbacks->MutableQueue.add(func)
+      pendingPayload.cancelCallbacks = Some(cancelCallbacks)
+    }
+  | #Resolved(_) => ()
+  }
+}
+
+let cancel = future => {
+  switch future.status {
+  | #Pending(pendingPayload) =>
+    switch pendingPayload.cancel {
+    | Some(cancel) => cancel()
+    | None => ()
+    }
+    switch pendingPayload.cancelCallbacks {
+    | Some(cancelCallbacks) => run(cancelCallbacks, ())
+    | None => ()
+    }
+    future.status = #Cancelled
+  | #Cancelled | #Resolved(_) => ()
+  }
+}
+
+let map = (source, f) => {
+  let future = makePure(resolve => {
+    source->get(value => {
+      resolve(f(value))
+    })
+  })
+  source->onCancel(() => {
+    let _ = future->cancel
+  })
+  future
+}
+
+let flatMap = (source, f) => {
+  let pendingPayload = {
+    resolveCallbacks: None,
+    cancelCallbacks: None,
+    cancel: None,
+  }
+  let future = {
+    status: #Pending(pendingPayload),
+  }
+  source->get(value => {
+    let source' = f(value)
+    source'->get(value => {
+      future.status = #Resolved(value)
+      switch pendingPayload.resolveCallbacks {
+      | Some(resolveCallbacks) => run(resolveCallbacks, value)
+      | _ => ()
+      }
+    })
+    source'->onCancel(() => future->cancel)
+  })
+  source->onCancel(() => future->cancel)
+  future
+}
+
+let tap = (future, f) => {
+  future->get(f)
+  future
+}
+
+let tapOk = (future, f) => {
+  future->get(result => {
+    switch result {
+    | Ok(ok) => f(ok)
+    | Error(_) => ()
+    }
+  })
+  future
+}
+
+let tapError = (future, f) => {
+  future->get(result => {
+    switch result {
+    | Ok(_) => ()
+    | Error(error) => f(error)
+    }
+  })
+  future
+}
+
+let mapResult = (future, f) => {
+  future->map(result =>
+    switch result {
+    | Ok(ok) => f(ok)
+    | Error(error) => Error(error)
+    }
+  )
+}
+
+let mapOk = (future, f) => {
+  future->map(result =>
+    switch result {
+    | Ok(ok) => Ok(f(ok))
+    | Error(error) => Error(error)
+    }
+  )
+}
+
+let mapError = (future, f) => {
+  future->map(result =>
+    switch result {
+    | Ok(ok) => Ok(ok)
+    | Error(error) => Error(f(error))
+    }
+  )
+}
+
+let flatMapOk = (future, f) => {
+  future->flatMap(result =>
+    switch result {
+    | Ok(ok) => f(ok)
+    | Error(error) => value(Error(error))
+    }
+  )
+}
+
+let flatMapError = (future, f) => {
+  future->flatMap(result =>
+    switch result {
+    | Ok(ok) => value(Ok(ok))
+    | Error(error) => f(error)
+    }
+  )
+}
+
+let all2 = ((a, b)) => makePure(resolve => a->get(a' => b->get(b' => resolve((a', b')))))
+
+let all3 = ((a, b, c)) =>
+  makePure(resolve => all2((a, b))->get(((a', b')) => c->get(c' => resolve((a', b', c')))))
+
+let all4 = ((a, b, c, d)) =>
+  makePure(resolve =>
+    all3((a, b, c))->get(((a', b', c')) => d->get(d' => resolve((a', b', c', d'))))
+  )
+
+let all5 = ((a, b, c, d, e)) =>
+  makePure(resolve =>
+    all4((a, b, c, d))->get(((a', b', c', d')) => e->get(e' => resolve((a', b', c', d', e'))))
+  )
+
+let all6 = ((a, b, c, d, e, f)) =>
+  makePure(resolve =>
+    all5((a, b, c, d, e))->get(((a', b', c', d', e')) =>
+      f->get(f' => resolve((a', b', c', d', e', f')))
+    )
+  )
+
+let all = futures =>
+  futures->Array.reduce(value([]), (acc, future) =>
+    future->flatMap(value => acc->map(xs => xs->Array.concat([value])))
+  )
