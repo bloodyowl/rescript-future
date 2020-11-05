@@ -1,3 +1,9 @@
+# 1.0.3
+
+Fixes:
+
+- Don't resolve if cancelled (b1b7f43)
+
 # 1.0.2
 
 Features:
