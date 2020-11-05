@@ -54,10 +54,14 @@ let make = init => {
     status: #Pending(pendingPayload),
   }
   let resolver = value => {
-    future.status = #Resolved(value)
-    switch pendingPayload.resolveCallbacks {
-    | Some(resolveCallbacks) => run(resolveCallbacks, value)
-    | _ => ()
+    switch future.status {
+    | #Pending(pendingPayload) =>
+      future.status = #Resolved(value)
+      switch pendingPayload.resolveCallbacks {
+      | Some(resolveCallbacks) => run(resolveCallbacks, value)
+      | _ => ()
+      }
+    | #Resolved(_) | #Cancelled => ()
     }
   }
   pendingPayload.cancel = init(resolver)
