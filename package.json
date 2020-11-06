@@ -1,6 +1,6 @@
 {
   "name": "rescript-future",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "scripts": {
     "clean": "bsb -clean-world",
     "build": "bsb -make-world",
