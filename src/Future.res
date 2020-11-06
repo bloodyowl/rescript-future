@@ -108,6 +108,7 @@ let onCancel = (future, func) => {
 let cancel = future => {
   switch future.status {
   | #Pending(pendingPayload) =>
+    future.status = #Cancelled
     switch pendingPayload.cancel {
     | Some(cancel) => cancel()
     | None => ()
@@ -116,7 +117,6 @@ let cancel = future => {
     | Some(cancelCallbacks) => run(cancelCallbacks, ())
     | None => ()
     }
-    future.status = #Cancelled
   | #Cancelled | #Resolved(_) => ()
   }
 }

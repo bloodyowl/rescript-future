@@ -250,17 +250,24 @@ describe("Future.t<result<a, b>>", ({testAsync}) => {
 describe("Future cancellation", ({testAsync}) => {
   testAsync("cancels promise and runs cancel effect", ({expect, callback}) => {
     let counter = ref(0)
+    let effect = ref(0)
     let future = Future.make(resolve => {
       let timeoutId = Js.Global.setTimeout(() => {
         incr(counter)
         resolve(1)
       }, 10)
-      Some(() => Js.Global.clearTimeout(timeoutId))
+      Some(
+        () => {
+          Js.Global.clearTimeout(timeoutId)
+          incr(effect)
+        },
+      )
     })
     future->Future.cancel
     expect.bool(future->Future.isCancelled).toBeTrue()
     let _ = Js.Global.setTimeout(() => {
       expect.int(counter.contents).toBe(0)
+      expect.int(effect.contents).toBe(1)
       callback()
     }, 20)
   })
@@ -317,12 +324,19 @@ describe("Future cancellation", ({testAsync}) => {
   testAsync("cancels to the top if specified", ({expect, callback}) => {
     let counter = ref(0)
     let secondCounter = ref(0)
+    let effect = ref(0)
+
     let future = Future.make(resolve => {
       let timeoutId = Js.Global.setTimeout(() => {
         incr(counter)
         resolve(1)
       }, 10)
-      Some(() => Js.Global.clearTimeout(timeoutId))
+      Some(
+        () => {
+          incr(effect)
+          Js.Global.clearTimeout(timeoutId)
+        },
+      )
     })
     let future2 = Future.make(resolve => {
       let timeoutId = Js.Global.setTimeout(() => {
@@ -340,6 +354,7 @@ describe("Future cancellation", ({testAsync}) => {
     expect.bool(future4->Future.isCancelled).toBeTrue()
     let _ = Js.Global.setTimeout(() => {
       expect.int(counter.contents).toBe(0)
+      expect.int(effect.contents).toBe(1)
       expect.int(secondCounter.contents).toBe(1)
       callback()
     }, 20)
