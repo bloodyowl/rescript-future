@@ -1,3 +1,9 @@
+# 1.0.4
+
+Fixes:
+
+- Prevent running cancel effect twice (88f462b)
+
 # 1.0.3
 
 Fixes:
