@@ -466,3 +466,16 @@ testAsync("simple to promiseResult", callback =>
     callback()
   })
 )
+
+testAsync("Deferred", callback => {
+  let v = ref(0)
+  let (future, resolve) = Deferred.make()
+
+  future->Future.tap(n => v := n + 1)->Future.map(n => n - 9)->Future.get(n => {
+    intEqual(n, 90)
+    intEqual(v.contents, 100)
+    callback()
+  })
+
+  resolve(99)
+})
