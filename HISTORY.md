@@ -1,3 +1,9 @@
+# 1.1.0
+
+Fixes:
+
+- Add `Deferred` (e929ee5)
+
 # 1.0.4
 
 Fixes:
