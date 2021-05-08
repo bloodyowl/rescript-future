@@ -1,8 +1,6 @@
-open Belt
-
 type pendingPayload<'a> = {
-  mutable resolveCallbacks: option<MutableQueue.t<'a => unit>>,
-  mutable cancelCallbacks: option<MutableQueue.t<unit => unit>>,
+  mutable resolveCallbacks: option<array<'a => unit>>,
+  mutable cancelCallbacks: option<array<unit => unit>>,
   mutable cancel: option<unit => unit>,
 }
 
@@ -35,14 +33,7 @@ let value = value => {
   status: #Resolved(value),
 }
 
-let rec run = (callbacks, value) => {
-  switch callbacks->MutableQueue.pop {
-  | Some(callback) =>
-    callback(value)
-    run(callbacks, value)
-  | None => ()
-  }
-}
+let run = (callbacks, value) => callbacks->Js.Array2.forEach(callback => callback(value))
 
 let make = init => {
   let pendingPayload = {
@@ -80,10 +71,9 @@ let get = (future, func) => {
   | #Cancelled => ()
   | #Pending(pendingPayload) =>
     switch pendingPayload.resolveCallbacks {
-    | Some(resolveCallbacks) => resolveCallbacks->MutableQueue.add(func)
+    | Some(resolveCallbacks) => resolveCallbacks->Js.Array2.push(func)->ignore
     | None =>
-      let resolveCallbacks = MutableQueue.make()
-      resolveCallbacks->MutableQueue.add(func)
+      let resolveCallbacks = [func]
       pendingPayload.resolveCallbacks = Some(resolveCallbacks)
     }
   | #Resolved(value) => func(value)
@@ -95,10 +85,9 @@ let onCancel = (future, func) => {
   | #Cancelled => func()
   | #Pending(pendingPayload) =>
     switch pendingPayload.cancelCallbacks {
-    | Some(cancelCallbacks) => cancelCallbacks->MutableQueue.add(func)
+    | Some(cancelCallbacks) => cancelCallbacks->Js.Array2.push(func)->ignore
     | None =>
-      let cancelCallbacks = MutableQueue.make()
-      cancelCallbacks->MutableQueue.add(func)
+      let cancelCallbacks = [func]
       pendingPayload.cancelCallbacks = Some(cancelCallbacks)
     }
   | #Resolved(_) => ()
@@ -265,7 +254,19 @@ let all6 = ((a, b, c, d, e, f)) =>
     )
   )
 
-let all = futures =>
-  futures->Array.reduce(value([]), (acc, future) =>
-    future->flatMap(value => acc->map(xs => xs->Array.concat([value])))
-  )
+let all = futures => {
+  let length = futures->Js.Array2.length
+
+  let rec reduce = (i, acc) =>
+    if i < length {
+      let acc = futures->Js.Array2.unsafe_get(i)->flatMap(value => acc->map(xs => {
+          xs->Js.Array2.push(value)->ignore
+          xs
+        }))
+      reduce(i + 1, acc)
+    } else {
+      acc
+    }
+
+  reduce(0, value([]))
+}
