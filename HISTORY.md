@@ -1,3 +1,9 @@
+# 1.1.1
+
+Changes:
+
+- Get rid of dependency on Belt (thanks [@cknitt](https://github.com/cknitt)!) (6185ee6)
+
 # 1.1.0
 
 Fixes:
