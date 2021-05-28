@@ -92,9 +92,9 @@ See the details in [the interface file](./src/Future.resi)
 
 ### Interop
 
-- `fromPromise`
-- `toPromise`
-- `resultToPromise`
+- `FuturePromise.fromPromise`
+- `FuturePromise.toPromise`
+- `FuturePromise.resultToPromise`
 
 ## Cancellation
 
