@@ -1,3 +1,9 @@
+# 1.1.2
+
+Changes:
+
+- Clearer docs & package (thanks [@MoOx](https://github.com/MoOx)!) (74c78dd, 5a60ced)
+
 # 1.1.1
 
 Changes:
