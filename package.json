@@ -1,6 +1,6 @@
 {
   "name": "rescript-future",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "repository": "https://github.com/bloodyowl/rescript-future",
   "scripts": {
     "clean": "bsb -clean-world",
