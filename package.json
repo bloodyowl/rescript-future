@@ -4,7 +4,7 @@
   "repository": "https://github.com/bloodyowl/rescript-future",
   "scripts": {
     "build": "rescript",
-    "start": "rescript build -w",
+    "start": "rescript build -with-deps -w",
     "clean": "rescript clean",
     "test": "retest test/*.mjs"
   },
@@ -15,6 +15,6 @@
   "license": "MIT",
   "devDependencies": {
     "rescript": "^9.1.4",
-    "rescript-test": "2.0.2"
+    "rescript-test": "^3.0.0"
   }
 }
