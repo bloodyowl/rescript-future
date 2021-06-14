@@ -16,7 +16,7 @@
     "module": "es6",
     "in-source": true
   },
-  "suffix": ".bs.js",
+  "suffix": ".mjs",
   "bs-dev-dependencies": ["rescript-test"],
   "warnings": {
     "error": "+101"
