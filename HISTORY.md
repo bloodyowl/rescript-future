@@ -1,3 +1,9 @@
+# 2.0.0
+
+Changes:
+
+- Move to ReScript (60d43ca)
+
 # 1.1.2
 
 Changes:
