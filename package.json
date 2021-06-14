@@ -14,7 +14,6 @@
   "author": "bloodyowl <bloodyowl@icloud.com>",
   "license": "MIT",
   "devDependencies": {
-    "bs-platform": "^8.3.2",
     "rescript": "^9.1.4",
     "rescript-test": "2.0.2"
   }
