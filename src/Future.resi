@@ -75,6 +75,11 @@ let get: (t<'a>, 'a => unit) => unit
 let cancel: t<'a> => unit
 
 /**
+ * Adds a handler to be called if the future is canceled.
+ */
+let onCancel: (t<'a>, unit => unit) => unit
+
+/**
  * Returns a future with the value of the source future mapped
  */
 let map: (t<'a>, ~propagateCancel: bool=?, 'a => 'b) => t<'b>
