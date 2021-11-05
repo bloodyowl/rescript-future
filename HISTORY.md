@@ -1,3 +1,9 @@
+# 2.1.0
+
+Features:
+
+- Expose `onCancel` (thanks [@huntwj](https://github.com/huntwj)) (829b75a)
+
 # 2.0.0
 
 Changes:
