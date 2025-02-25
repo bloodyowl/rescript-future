@@ -14,7 +14,7 @@
   "author": "bloodyowl <bloodyowl@icloud.com>",
   "license": "MIT",
   "devDependencies": {
-    "rescript": "^9.1.4",
-    "rescript-test": "^3.0.0"
+    "rescript": "^11.1.0",
+    "rescript-test": "^7.0.0"
   }
 }

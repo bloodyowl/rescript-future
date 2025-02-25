@@ -10,7 +10,7 @@ Run the following in your console:
 $ yarn add rescript-future
 ```
 
-Then add `rescript-future` to your `bsconfig.json`'s `bs-dependencies`:
+Then add `rescript-future` to your `rescript.json`'s `bs-dependencies`:
 
 ```diff
  {
