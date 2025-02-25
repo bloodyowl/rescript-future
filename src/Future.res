@@ -33,7 +33,7 @@ let value = value => {
   status: #Resolved(value),
 }
 
-let run = (callbacks, value) => callbacks->Js.Array2.forEach(callback => callback(value))
+let run = (callbacks, value) => callbacks->Array.forEach(callback => callback(value))
 
 let make = init => {
   let pendingPayload = {
@@ -71,7 +71,7 @@ let get = (future, func) => {
   | #Cancelled => ()
   | #Pending(pendingPayload) =>
     switch pendingPayload.resolveCallbacks {
-    | Some(resolveCallbacks) => resolveCallbacks->Js.Array2.push(func)->ignore
+    | Some(resolveCallbacks) => resolveCallbacks->Array.push(func)->ignore
     | None =>
       let resolveCallbacks = [func]
       pendingPayload.resolveCallbacks = Some(resolveCallbacks)
@@ -85,7 +85,7 @@ let onCancel = (future, func) => {
   | #Cancelled => func()
   | #Pending(pendingPayload) =>
     switch pendingPayload.cancelCallbacks {
-    | Some(cancelCallbacks) => cancelCallbacks->Js.Array2.push(func)->ignore
+    | Some(cancelCallbacks) => cancelCallbacks->Array.push(func)->ignore
     | None =>
       let cancelCallbacks = [func]
       pendingPayload.cancelCallbacks = Some(cancelCallbacks)
@@ -255,14 +255,19 @@ let all6 = ((a, b, c, d, e, f)) =>
   )
 
 let all = futures => {
-  let length = futures->Js.Array2.length
+  let length = futures->Array.length
 
   let rec reduce = (i, acc) =>
     if i < length {
-      let acc = futures->Js.Array2.unsafe_get(i)->flatMap(value => acc->map(xs => {
-          xs->Js.Array2.push(value)->ignore
-          xs
-        }))
+      let acc =
+        futures
+        ->Array.getUnsafe(i)
+        ->flatMap(value =>
+          acc->map(xs => {
+            xs->Array.push(value)->ignore
+            xs
+          })
+        )
       reduce(i + 1, acc)
     } else {
       acc

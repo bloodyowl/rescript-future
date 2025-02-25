@@ -33,7 +33,7 @@ A **Future** is a data structure that represents a potential value. It works bot
 Future.value(1)
 ->Future.map(x => x + 1)
 ->Future.flatMap(x => Future.value(x + 1))
-->Future.get(Js.log)
+->Future.get(Console.log)
 // Logs: 3
 ```
 
