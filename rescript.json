@@ -18,7 +18,7 @@
   },
   "suffix": ".mjs",
   "bs-dependencies": ["@rescript/core"],
-  "bs-dev-dependencies": ["rescript-test"],
+  "bs-dev-dependencies": ["@rescript/core", "rescript-test"],
   "warnings": {
     "error": "+101"
   },
