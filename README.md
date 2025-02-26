@@ -10,7 +10,7 @@ Run the following in your console:
 $ yarn add rescript-future
 ```
 
-Then add `rescript-future` to your `bsconfig.json`'s `bs-dependencies`:
+Then add `rescript-future` to your `rescript.json`'s `bs-dependencies`:
 
 ```diff
  {
@@ -33,7 +33,7 @@ A **Future** is a data structure that represents a potential value. It works bot
 Future.value(1)
 ->Future.map(x => x + 1)
 ->Future.flatMap(x => Future.value(x + 1))
-->Future.get(Js.log)
+->Future.get(Console.log)
 // Logs: 3
 ```
 

@@ -1,5 +1,4 @@
 open Test
-open Belt
 
 let isTrue = a => assertion(~operator="isTrue", (a, b) => a === b, a, true)
 let isFalse = a => assertion(~operator="isFalse", (a, b) => a === b, a, false)
@@ -7,20 +6,22 @@ let stringEqual = (a: string, b: string) =>
   assertion(~operator="stringEqual", (a, b) => a === b, a, b)
 let intEqual = (a: int, b: int) => assertion(~operator="intEqual", (a, b) => a === b, a, b)
 let resultEqual = (a, b) =>
-  assertion(~operator="intEqual", (a, b) => Result.eq(a, b, (a, b) => a == b), a, b)
+  assertion(~operator="intEqual", (a, b) => Result.equal(a, b, (a, b) => a == b), a, b)
 let arrayEqual = (a, b) =>
-  assertion(~operator="intEqual", (a, b) => Array.eq(a, b, (a, b) => a == b), a, b)
+  assertion(~operator="intEqual", (a, b) => Array.equal(a, b, (a, b) => a == b), a, b)
 let deepEqual = (a, b) => assertion(~operator="intEqual", (a, b) => a == b, a, b)
 
 testAsync("sync chaining", callback =>
-  Future.value("one")->Future.map(s => `${s}!`)->Future.get(s => {
+  Future.value("one")
+  ->Future.map(s => `${s}!`)
+  ->Future.get(s => {
     stringEqual(s, "one!")
     callback()
   })
 )
 
 testAsync("async chaining", callback =>
-  Future.makePure(resolve => Js.Global.setTimeout(() => resolve(20), 25)->ignore)
+  Future.makePure(resolve => setTimeout(() => resolve(20), 25)->ignore)
   ->Future.map(s => Int.toString(s))
   ->Future.map(s => `${s}!`)
   ->Future.get(s => {
@@ -31,7 +32,10 @@ testAsync("async chaining", callback =>
 
 testAsync("tap", callback => {
   let v = ref(0)
-  Future.value(99)->Future.tap(n => v := n + 1)->Future.map(n => n - 9)->Future.get(n => {
+  Future.value(99)
+  ->Future.tap(n => v := n + 1)
+  ->Future.map(n => n - 9)
+  ->Future.get(n => {
     intEqual(n, 90)
     intEqual(v.contents, 100)
     callback()
@@ -39,7 +43,9 @@ testAsync("tap", callback => {
 })
 
 testAsync("flatMap", callback => {
-  Future.value(59)->Future.flatMap(n => Future.value(n + 1))->Future.get(n => {
+  Future.value(59)
+  ->Future.flatMap(n => Future.value(n + 1))
+  ->Future.get(n => {
     intEqual(n, 60)
     callback()
   })
@@ -62,9 +68,12 @@ testAsync("multiple gets", callback => {
 testAsync("multiple gets (async)", callback => {
   let count = ref(0)
   let future = Future.makePure(resolve => {
-    let _ = Js.Global.setTimeout(() => {
-      resolve(0)
-    }, 25)
+    let _ = setTimeout(
+      () => {
+        resolve(0)
+      },
+      25,
+    )
   })->Future.map(_ => count := count.contents + 1)
   future->Future.get(_ => ()) //Runs after previous future
   let initialCount = count.contents
@@ -81,11 +90,9 @@ testAsync("multiple gets (async)", callback => {
 testAsync("all (async)", callback => {
   Future.all([
     Future.value(1),
-    Future.makePure(resolve => Js.Global.setTimeout(() => resolve(2), 50)->ignore),
-    Future.makePure(resolve => Js.Global.setTimeout(() => resolve(3), 25)->ignore),
-    Future.makePure(resolve => Js.Global.setTimeout(() => resolve(), 75)->ignore)->Future.map(() =>
-      4
-    ),
+    Future.makePure(resolve => setTimeout(() => resolve(2), 50)->ignore),
+    Future.makePure(resolve => setTimeout(() => resolve(3), 25)->ignore),
+    Future.makePure(resolve => setTimeout(() => resolve(), 75)->ignore)->Future.map(() => 4),
   ])->Future.get(result => {
     arrayEqual(result, [1, 2, 3, 4])
     callback()
@@ -95,7 +102,7 @@ testAsync("all (async)", callback => {
 testAsync("all2", callback => {
   Future.all2((
     Future.value(1),
-    Future.makePure(resolve => Js.Global.setTimeout(() => resolve(2), 50)->ignore),
+    Future.makePure(resolve => setTimeout(() => resolve(2), 50)->ignore),
   ))->Future.get(result => {
     deepEqual(result, (1, 2))
     callback()
@@ -105,8 +112,8 @@ testAsync("all2", callback => {
 testAsync("all3", callback => {
   Future.all3((
     Future.value(1),
-    Future.makePure(resolve => Js.Global.setTimeout(() => resolve(2), 50)->ignore),
-    Future.makePure(resolve => Js.Global.setTimeout(() => resolve(3), 25)->ignore),
+    Future.makePure(resolve => setTimeout(() => resolve(2), 50)->ignore),
+    Future.makePure(resolve => setTimeout(() => resolve(3), 25)->ignore),
   ))->Future.get(result => {
     deepEqual(result, (1, 2, 3))
     callback()
@@ -116,11 +123,9 @@ testAsync("all3", callback => {
 testAsync("all4", callback => {
   Future.all4((
     Future.value(1),
-    Future.makePure(resolve => Js.Global.setTimeout(() => resolve(2), 50)->ignore),
-    Future.makePure(resolve => Js.Global.setTimeout(() => resolve(3), 25)->ignore),
-    Future.makePure(resolve => Js.Global.setTimeout(() => resolve(), 75)->ignore)->Future.map(() =>
-      4
-    ),
+    Future.makePure(resolve => setTimeout(() => resolve(2), 50)->ignore),
+    Future.makePure(resolve => setTimeout(() => resolve(3), 25)->ignore),
+    Future.makePure(resolve => setTimeout(() => resolve(), 75)->ignore)->Future.map(() => 4),
   ))->Future.get(result => {
     deepEqual(result, (1, 2, 3, 4))
     callback()
@@ -130,11 +135,9 @@ testAsync("all4", callback => {
 testAsync("all5", callback => {
   Future.all5((
     Future.value(1),
-    Future.makePure(resolve => Js.Global.setTimeout(() => resolve(2), 50)->ignore),
-    Future.makePure(resolve => Js.Global.setTimeout(() => resolve(3), 25)->ignore),
-    Future.makePure(resolve => Js.Global.setTimeout(() => resolve(), 75)->ignore)->Future.map(() =>
-      4
-    ),
+    Future.makePure(resolve => setTimeout(() => resolve(2), 50)->ignore),
+    Future.makePure(resolve => setTimeout(() => resolve(3), 25)->ignore),
+    Future.makePure(resolve => setTimeout(() => resolve(), 75)->ignore)->Future.map(() => 4),
     Future.value(5),
   ))->Future.get(result => {
     deepEqual(result, (1, 2, 3, 4, 5))
@@ -145,11 +148,9 @@ testAsync("all5", callback => {
 testAsync("all6", callback => {
   Future.all6((
     Future.value(1),
-    Future.makePure(resolve => Js.Global.setTimeout(() => resolve(2), 50)->ignore),
-    Future.makePure(resolve => Js.Global.setTimeout(() => resolve(3), 25)->ignore),
-    Future.makePure(resolve => Js.Global.setTimeout(() => resolve(), 75)->ignore)->Future.map(() =>
-      4
-    ),
+    Future.makePure(resolve => setTimeout(() => resolve(2), 50)->ignore),
+    Future.makePure(resolve => setTimeout(() => resolve(3), 25)->ignore),
+    Future.makePure(resolve => setTimeout(() => resolve(), 75)->ignore)->Future.map(() => 4),
     Future.value(5),
     Future.value(6),
   ))->Future.get(result => {
@@ -159,49 +160,65 @@ testAsync("all6", callback => {
 })
 
 testAsync("mapOk", callback =>
-  Future.value(Ok("one"))->Future.mapOk(s => `${s}!`)->Future.get(s => {
+  Future.value(Ok("one"))
+  ->Future.mapOk(s => `${s}!`)
+  ->Future.get(s => {
     deepEqual(s, Ok("one!"))
     callback()
   })
 )
 testAsync("mapOk error", callback =>
-  Future.value(Error("one"))->Future.mapOk(s => `${s}!`)->Future.get(s => {
+  Future.value(Error("one"))
+  ->Future.mapOk(s => `${s}!`)
+  ->Future.get(s => {
     deepEqual(s, Error("one"))
     callback()
   })
 )
 testAsync("mapError", callback =>
-  Future.value(Error("one"))->Future.mapError(s => `${s}!`)->Future.get(s => {
+  Future.value(Error("one"))
+  ->Future.mapError(s => `${s}!`)
+  ->Future.get(s => {
     deepEqual(s, Error("one!"))
     callback()
   })
 )
 testAsync("mapError ok", callback =>
-  Future.value(Ok("one"))->Future.mapError(s => `${s}!`)->Future.get(s => {
+  Future.value(Ok("one"))
+  ->Future.mapError(s => `${s}!`)
+  ->Future.get(s => {
     deepEqual(s, Ok("one"))
     callback()
   })
 )
 testAsync("mapResult", callback =>
-  Future.value(Ok("one"))->Future.mapResult(s => Ok(`${s}!`))->Future.get(s => {
+  Future.value(Ok("one"))
+  ->Future.mapResult(s => Ok(`${s}!`))
+  ->Future.get(s => {
     deepEqual(s, Ok("one!"))
     callback()
   })
 )
 testAsync("mapResult error", callback =>
-  Future.value(Error("one"))->Future.mapResult(s => Ok(`${s}!`))->Future.get(s => {
+  Future.value(Error("one"))
+  ->Future.mapResult(s => Ok(`${s}!`))
+  ->Future.get(s => {
     deepEqual(s, Error("one"))
     callback()
   })
 )
 testAsync("flatMapOk", callback =>
-  Future.value(Ok("one"))->Future.flatMapOk(s => Future.value(Ok(`${s}!`)))->Future.get(s => {
+  Future.value(Ok("one"))
+  ->Future.flatMapOk(s => Future.value(Ok(`${s}!`)))
+  ->Future.get(s => {
     deepEqual(s, Ok("one!"))
     callback()
   })
 )
 testAsync("flatMapOk error", callback =>
-  Future.value(Error("one"))->Future.flatMapOk(s => Future.value(Ok(`${s}!`)))->Future.get(s => {
+  Future.value(Error("one"))
+  ->Future.flatMapOk(s => Future.value(Ok(`${s}!`)))
+  ->Future.get(s => {
     deepEqual(s, Error("one"))
     callback()
   })
@@ -215,38 +232,48 @@ testAsync("flatMapError", callback =>
   })
 )
 testAsync("flatMapError ok", callback =>
-  Future.value(Ok("one"))->Future.flatMapError(s => Future.value(Error(`${s}!`)))->Future.get(s => {
+  Future.value(Ok("one"))
+  ->Future.flatMapError(s => Future.value(Error(`${s}!`)))
+  ->Future.get(s => {
     deepEqual(s, Ok("one"))
     callback()
   })
 )
 
 testAsync("tapOk", callback => {
-  Future.value(Ok("one"))->Future.tapOk(s => {
+  Future.value(Ok("one"))
+  ->Future.tapOk(s => {
     stringEqual(s, "one")
-  })->Future.get(_ => callback())
+  })
+  ->Future.get(_ => callback())
 })
 testAsync("tapOk error", callback => {
   let counter = ref(0)
 
-  Future.value(Error("one"))->Future.tapOk(_ => {
+  Future.value(Error("one"))
+  ->Future.tapOk(_ => {
     incr(counter)
-  })->Future.get(_ => {
+  })
+  ->Future.get(_ => {
     intEqual(counter.contents, 0)
     callback()
   })
 })
 testAsync("tapError", callback => {
-  Future.value(Error("one"))->Future.tapError(s => {
+  Future.value(Error("one"))
+  ->Future.tapError(s => {
     stringEqual(s, "one")
-  })->Future.get(_ => callback())
+  })
+  ->Future.get(_ => callback())
 })
 testAsync("tapError ok", callback => {
   let counter = ref(0)
 
-  Future.value(Ok("one"))->Future.tapError(_ => {
+  Future.value(Ok("one"))
+  ->Future.tapError(_ => {
     incr(counter)
-  })->Future.get(_ => {
+  })
+  ->Future.get(_ => {
     intEqual(counter.contents, 0)
     callback()
   })
@@ -256,20 +283,23 @@ testAsync("cancels promise and runs cancel effect", callback => {
   let counter = ref(0)
   let effect = ref(0)
   let future = Future.make(resolve => {
-    let timeoutId = Js.Global.setTimeout(() => {
-      incr(counter)
-      resolve(1)
-    }, 10)
+    let timeoutId = setTimeout(
+      () => {
+        incr(counter)
+        resolve(1)
+      },
+      10,
+    )
     Some(
       () => {
-        Js.Global.clearTimeout(timeoutId)
+        clearTimeout(timeoutId)
         incr(effect)
       },
     )
   })
   future->Future.cancel
   isTrue(future->Future.isCancelled)
-  let _ = Js.Global.setTimeout(() => {
+  let _ = setTimeout(() => {
     intEqual(counter.contents, 0)
     intEqual(effect.contents, 1)
     callback()
@@ -278,17 +308,20 @@ testAsync("cancels promise and runs cancel effect", callback => {
 testAsync("cancels future", callback => {
   let counter = ref(0)
   let future = Future.make(resolve => {
-    let timeoutId = Js.Global.setTimeout(() => {
-      incr(counter)
-      resolve(1)
-    }, 10)
-    Some(() => Js.Global.clearTimeout(timeoutId))
+    let timeoutId = setTimeout(
+      () => {
+        incr(counter)
+        resolve(1)
+      },
+      10,
+    )
+    Some(() => clearTimeout(timeoutId))
   })
   let future2 = future->Future.map(item => item + 1)
   future2->Future.cancel
   isFalse(future->Future.isCancelled)
   isTrue(future2->Future.isCancelled)
-  let _ = Js.Global.setTimeout(() => {
+  let _ = setTimeout(() => {
     intEqual(counter.contents, 1)
     callback()
   }, 20)
@@ -298,18 +331,24 @@ testAsync("doesn't cancel futures returned by flatMap", callback => {
   let counter = ref(0)
   let secondCounter = ref(0)
   let future = Future.make(resolve => {
-    let timeoutId = Js.Global.setTimeout(() => {
-      incr(counter)
-      resolve(1)
-    }, 10)
-    Some(() => Js.Global.clearTimeout(timeoutId))
+    let timeoutId = setTimeout(
+      () => {
+        incr(counter)
+        resolve(1)
+      },
+      10,
+    )
+    Some(() => clearTimeout(timeoutId))
   })
   let future2 = Future.make(resolve => {
-    let timeoutId = Js.Global.setTimeout(() => {
-      incr(secondCounter)
-      resolve(1)
-    }, 10)
-    Some(() => Js.Global.clearTimeout(timeoutId))
+    let timeoutId = setTimeout(
+      () => {
+        incr(secondCounter)
+        resolve(1)
+      },
+      10,
+    )
+    Some(() => clearTimeout(timeoutId))
   })
   let future3 = future->Future.flatMap(_ => future2)
   let future4 = future3->Future.map(item => item + 1)
@@ -318,7 +357,7 @@ testAsync("doesn't cancel futures returned by flatMap", callback => {
   isFalse(future2->Future.isCancelled)
   isFalse(future3->Future.isCancelled)
   isTrue(future4->Future.isCancelled)
-  let _ = Js.Global.setTimeout(() => {
+  let _ = setTimeout(() => {
     intEqual(counter.contents, 1)
     intEqual(secondCounter.contents, 1)
     callback()
@@ -331,23 +370,29 @@ testAsync("cancels to the top if specified", callback => {
   let effect = ref(0)
 
   let future = Future.make(resolve => {
-    let timeoutId = Js.Global.setTimeout(() => {
-      incr(counter)
-      resolve(1)
-    }, 10)
+    let timeoutId = setTimeout(
+      () => {
+        incr(counter)
+        resolve(1)
+      },
+      10,
+    )
     Some(
       () => {
         incr(effect)
-        Js.Global.clearTimeout(timeoutId)
+        clearTimeout(timeoutId)
       },
     )
   })
   let future2 = Future.make(resolve => {
-    let timeoutId = Js.Global.setTimeout(() => {
-      incr(secondCounter)
-      resolve(1)
-    }, 10)
-    Some(() => Js.Global.clearTimeout(timeoutId))
+    let timeoutId = setTimeout(
+      () => {
+        incr(secondCounter)
+        resolve(1)
+      },
+      10,
+    )
+    Some(() => clearTimeout(timeoutId))
   })
   let future3 = future->Future.flatMap(~propagateCancel=true, _ => future2)
   let future4 = future3->Future.map(~propagateCancel=true, item => item + 1)
@@ -356,7 +401,7 @@ testAsync("cancels to the top if specified", callback => {
   isFalse(future2->Future.isCancelled)
   isTrue(future3->Future.isCancelled)
   isTrue(future4->Future.isCancelled)
-  let _ = Js.Global.setTimeout(() => {
+  let _ = setTimeout(() => {
     intEqual(counter.contents, 0)
     intEqual(effect.contents, 1)
     intEqual(secondCounter.contents, 1)
@@ -367,17 +412,20 @@ testAsync("cancels to the top if specified", callback => {
 testAsync("cancels promise and runs cancel effect up the dependents", callback => {
   let counter = ref(0)
   let future = Future.make(resolve => {
-    let timeoutId = Js.Global.setTimeout(() => {
-      incr(counter)
-      resolve(1)
-    }, 10)
-    Some(() => Js.Global.clearTimeout(timeoutId))
+    let timeoutId = setTimeout(
+      () => {
+        incr(counter)
+        resolve(1)
+      },
+      10,
+    )
+    Some(() => clearTimeout(timeoutId))
   })
   let future2 = future->Future.map(item => item + 1)
   future->Future.cancel
   isTrue(future->Future.isCancelled)
   isTrue(future2->Future.isCancelled)
-  let _ = Js.Global.setTimeout(() => {
+  let _ = setTimeout(() => {
     intEqual(counter.contents, 0)
     callback()
   }, 20)
@@ -387,18 +435,24 @@ testAsync("doesn't cancel futures returned by flatMap", callback => {
   let counter = ref(0)
   let secondCounter = ref(0)
   let future = Future.make(resolve => {
-    let timeoutId = Js.Global.setTimeout(() => {
-      incr(counter)
-      resolve(1)
-    }, 10)
-    Some(() => Js.Global.clearTimeout(timeoutId))
+    let timeoutId = setTimeout(
+      () => {
+        incr(counter)
+        resolve(1)
+      },
+      10,
+    )
+    Some(() => clearTimeout(timeoutId))
   })
   let future2 = Future.make(resolve => {
-    let timeoutId = Js.Global.setTimeout(() => {
-      incr(secondCounter)
-      resolve(1)
-    }, 10)
-    Some(() => Js.Global.clearTimeout(timeoutId))
+    let timeoutId = setTimeout(
+      () => {
+        incr(secondCounter)
+        resolve(1)
+      },
+      10,
+    )
+    Some(() => clearTimeout(timeoutId))
   })
   let future3 = future->Future.flatMap(_ => future2)
   let future4 = future3->Future.map(item => item + 1)
@@ -407,7 +461,7 @@ testAsync("doesn't cancel futures returned by flatMap", callback => {
   isFalse(future2->Future.isCancelled)
   isTrue(future3->Future.isCancelled)
   isTrue(future4->Future.isCancelled)
-  let _ = Js.Global.setTimeout(() => {
+  let _ = setTimeout(() => {
     intEqual(counter.contents, 0)
     intEqual(secondCounter.contents, 1)
     callback()
@@ -417,7 +471,7 @@ testAsync("doesn't cancel futures returned by flatMap", callback => {
 external asExn: 'a => exn = "%identity"
 
 testAsync("simple from promise", callback =>
-  FuturePromise.fromPromise(Js.Promise.resolve("one"))
+  FuturePromise.fromPromise(Promise.resolve("one"))
   ->Future.mapOk(s => `${s}!`)
   ->Future.get(s => {
     deepEqual(s, Ok("one!"))
@@ -425,7 +479,7 @@ testAsync("simple from promise", callback =>
   })
 )
 testAsync("simple from promise", callback =>
-  FuturePromise.fromPromise(Js.Promise.reject(Not_found))
+  FuturePromise.fromPromise(Promise.reject(Not_found))
   ->Future.mapOk(s => `${s}!`)
   ->Future.mapError(asExn)
   ->Future.get(s => {
@@ -471,7 +525,10 @@ testAsync("Deferred", callback => {
   let v = ref(0)
   let (future, resolve) = Deferred.make()
 
-  future->Future.tap(n => v := n + 1)->Future.map(n => n - 9)->Future.get(n => {
+  future
+  ->Future.tap(n => v := n + 1)
+  ->Future.map(n => n - 9)
+  ->Future.get(n => {
     intEqual(n, 90)
     intEqual(v.contents, 100)
     callback()

@@ -21,8 +21,8 @@ let value: 'a => t<'a>
  *
  * ```reason
  * Future.make(resolve => {
- *   let timeoutId = Js.Global.setTimeout(resolve, 100)
- *   Some(() => Js.Global.clearTimeout(timeoutId))
+ *   let timeoutId = setTimeout(resolve, 100)
+ *   Some(() => clearTimeout(timeoutId))
  * })
  * ```
  */
@@ -51,7 +51,7 @@ let makePure: (('a => unit) => unit) => t<'a>
  *
  * example:
  *
- * future->Future.get(Js.log)
+ * future->Future.get(Console.log)
  */
 let get: (t<'a>, 'a => unit) => unit
 

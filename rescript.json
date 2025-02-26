@@ -13,11 +13,19 @@
     }
   ],
   "package-specs": {
-    "module": "es6",
+    "module": "esmodule",
     "in-source": true
   },
   "suffix": ".mjs",
-  "bs-dev-dependencies": ["rescript-test"],
+  "bs-dependencies": [
+    "@rescript/core"
+  ],
+  "bs-dev-dependencies": [
+    "rescript-test"
+  ],
+  "bsc-flags": [
+    "-open RescriptCore"
+  ],
   "warnings": {
     "error": "+101"
   }
