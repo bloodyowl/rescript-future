@@ -13,7 +13,11 @@
   ],
   "author": "bloodyowl <bloodyowl@icloud.com>",
   "license": "MIT",
+  "peerDependencies": {
+    "@rescript/core": "^1.6.1"
+  },
   "devDependencies": {
+    "@rescript/core": "^1.6.1",
     "rescript": "^11.1.0",
     "rescript-test": "^7.0.0"
   }
