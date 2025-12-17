@@ -3,8 +3,8 @@
   "version": "2.2.0",
   "repository": "https://github.com/bloodyowl/rescript-future",
   "scripts": {
-    "build": "rescript",
-    "start": "rescript build -with-deps -w",
+    "build": "rescript build",
+    "start": "rescript watch",
     "clean": "rescript clean",
     "test": "retest test/*.mjs"
   },
@@ -13,12 +13,8 @@
   ],
   "author": "bloodyowl <bloodyowl@icloud.com>",
   "license": "MIT",
-  "peerDependencies": {
-    "@rescript/core": "^1.6.1"
-  },
   "devDependencies": {
-    "@rescript/core": "^1.6.1",
-    "rescript": "^11.1.0",
-    "rescript-test": "^7.0.0"
+    "rescript": "^12.0.1",
+    "rescript-test": "^8.0.0"
   }
 }

@@ -6,7 +6,12 @@ let stringEqual = (a: string, b: string) =>
   assertion(~operator="stringEqual", (a, b) => a === b, a, b)
 let intEqual = (a: int, b: int) => assertion(~operator="intEqual", (a, b) => a === b, a, b)
 let resultEqual = (a, b) =>
-  assertion(~operator="intEqual", (a, b) => Result.equal(a, b, (a, b) => a == b), a, b)
+  assertion(
+    ~operator="resultEqual",
+    (a, b) => Result.equal(a, b, (a, b) => a == b, (e1, e2) => e1 === e2),
+    a,
+    b,
+  )
 let arrayEqual = (a, b) =>
   assertion(~operator="intEqual", (a, b) => Array.equal(a, b, (a, b) => a == b), a, b)
 let deepEqual = (a, b) => assertion(~operator="intEqual", (a, b) => a == b, a, b)
@@ -252,7 +257,7 @@ testAsync("tapOk error", callback => {
 
   Future.value(Error("one"))
   ->Future.tapOk(_ => {
-    incr(counter)
+    Int.Ref.increment(counter)
   })
   ->Future.get(_ => {
     intEqual(counter.contents, 0)
@@ -271,7 +276,7 @@ testAsync("tapError ok", callback => {
 
   Future.value(Ok("one"))
   ->Future.tapError(_ => {
-    incr(counter)
+    Int.Ref.increment(counter)
   })
   ->Future.get(_ => {
     intEqual(counter.contents, 0)
@@ -285,7 +290,7 @@ testAsync("cancels promise and runs cancel effect", callback => {
   let future = Future.make(resolve => {
     let timeoutId = setTimeout(
       () => {
-        incr(counter)
+        Int.Ref.increment(counter)
         resolve(1)
       },
       10,
@@ -293,7 +298,7 @@ testAsync("cancels promise and runs cancel effect", callback => {
     Some(
       () => {
         clearTimeout(timeoutId)
-        incr(effect)
+        Int.Ref.increment(effect)
       },
     )
   })
@@ -310,7 +315,7 @@ testAsync("cancels future", callback => {
   let future = Future.make(resolve => {
     let timeoutId = setTimeout(
       () => {
-        incr(counter)
+        Int.Ref.increment(counter)
         resolve(1)
       },
       10,
@@ -333,7 +338,7 @@ testAsync("doesn't cancel futures returned by flatMap", callback => {
   let future = Future.make(resolve => {
     let timeoutId = setTimeout(
       () => {
-        incr(counter)
+        Int.Ref.increment(counter)
         resolve(1)
       },
       10,
@@ -343,7 +348,7 @@ testAsync("doesn't cancel futures returned by flatMap", callback => {
   let future2 = Future.make(resolve => {
     let timeoutId = setTimeout(
       () => {
-        incr(secondCounter)
+        Int.Ref.increment(secondCounter)
         resolve(1)
       },
       10,
@@ -372,14 +377,14 @@ testAsync("cancels to the top if specified", callback => {
   let future = Future.make(resolve => {
     let timeoutId = setTimeout(
       () => {
-        incr(counter)
+        Int.Ref.increment(counter)
         resolve(1)
       },
       10,
     )
     Some(
       () => {
-        incr(effect)
+        Int.Ref.increment(effect)
         clearTimeout(timeoutId)
       },
     )
@@ -387,7 +392,7 @@ testAsync("cancels to the top if specified", callback => {
   let future2 = Future.make(resolve => {
     let timeoutId = setTimeout(
       () => {
-        incr(secondCounter)
+        Int.Ref.increment(secondCounter)
         resolve(1)
       },
       10,
@@ -414,7 +419,7 @@ testAsync("cancels promise and runs cancel effect up the dependents", callback =
   let future = Future.make(resolve => {
     let timeoutId = setTimeout(
       () => {
-        incr(counter)
+        Int.Ref.increment(counter)
         resolve(1)
       },
       10,
@@ -437,7 +442,7 @@ testAsync("doesn't cancel futures returned by flatMap", callback => {
   let future = Future.make(resolve => {
     let timeoutId = setTimeout(
       () => {
-        incr(counter)
+        Int.Ref.increment(counter)
         resolve(1)
       },
       10,
@@ -447,7 +452,7 @@ testAsync("doesn't cancel futures returned by flatMap", callback => {
   let future2 = Future.make(resolve => {
     let timeoutId = setTimeout(
       () => {
-        incr(secondCounter)
+        Int.Ref.increment(secondCounter)
         resolve(1)
       },
       10,
