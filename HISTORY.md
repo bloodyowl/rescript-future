@@ -1,3 +1,9 @@
+# 3.0.0
+
+Changes:
+
+- Upgrade to ReScript 12 (c1dfdc5)
+
 # 2.1.0
 
 Features:
